@@ -1,6 +1,13 @@
 @OrderManagement.Api_HostAddress = http://localhost:5053
 
-GET {{OrderManagement.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{OrderManagement.Api_HostAddress}}/AddOrder/
+Content-Type: application/json
+
+{
+  "orderName":"Some Order"
+}
 
 ###
+
+GET {{OrderManagement.Api_HostAddress}}/Orders/
+Accept: application/json
