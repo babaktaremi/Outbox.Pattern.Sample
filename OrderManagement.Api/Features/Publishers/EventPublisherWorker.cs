@@ -33,20 +33,21 @@ public class EventPublisherWorker(IServiceScopeFactory scopeFactory, ILogger<Eve
                 {
                     try
                     {
-                        if (@event.DomainEvent is OrderCreatedEvent orderCreatedEvent)
-                            await publisher.Publish(new DomainEventWrapper<OrderCreatedEvent>(orderCreatedEvent), stoppingToken);
+                      
+                        var eventWrapperModel =
+                            Activator.CreateInstance(
+                                typeof(DomainEventWrapper<>).MakeGenericType(@event.DomainEvent.GetType()),
+                                new object[] { @event.DomainEvent });
 
-                        if (@event.DomainEvent is SendCreatedOrderEmailEvent sendCreatedOrderEmailEvent)
-                            await publisher.Publish(
-                                new DomainEventWrapper<SendCreatedOrderEmailEvent>(sendCreatedOrderEmailEvent),
-                                stoppingToken);
+                        if (eventWrapperModel is not null) 
+                            await publisher.Publish(eventWrapperModel, stoppingToken);
 
                         eventsToRemove.Add(@event);
 
                     }
                     catch (Exception e)
                     {
-                        logger.LogError(e, "There was an error publishing event {eventName}", @event.DomainEvent.GetType().Name);
+                        logger.LogError(e, "There was an error publishing event ");
                     }
                 }
 
