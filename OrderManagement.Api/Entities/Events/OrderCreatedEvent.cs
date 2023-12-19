@@ -3,7 +3,7 @@ using OrderManagement.Api.Entities.Common;
 
 namespace OrderManagement.Api.Entities.Events;
 
-public class OrderCreatedEvent:IDomainEvent,INotification
+public class OrderCreatedEvent:IDomainEvent
 {
     public Guid OrderId { get; }
 

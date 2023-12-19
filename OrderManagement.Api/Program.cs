@@ -1,8 +1,12 @@
 using MediatR;
+using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore;
 using OrderManagement.Api;
-using OrderManagement.Api.Entities.Common;
+using OrderManagement.Api.Entities.Events;
 using OrderManagement.Api.Features.Commands;
+using OrderManagement.Api.Features.EventHandlers;
+using OrderManagement.Api.Features.Publishers;
+using OrderManagement.Api.Features.Publishers.Models;
 using OrderManagement.Api.Features.Queries;
 using OrderManagement.Api.Persistence;
 
@@ -22,7 +26,10 @@ builder.Services.AddMediatR(configuration =>
 {
     configuration.RegisterServicesFromAssemblyContaining<OrderDbContext>();
     configuration.AutoRegisterRequestProcessors = true;
+    configuration.NotificationPublisher = new TaskWhenAllPublisher();
 });
+
+
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
 {

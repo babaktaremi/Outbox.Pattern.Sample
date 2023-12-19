@@ -1,8 +1,12 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using OrderManagement.Api.Entities;
+using OrderManagement.Api.Entities.Common;
+using OrderManagement.Api.Entities.Events;
+using OrderManagement.Api.Features.Publishers.Models;
 using OrderManagement.Api.Persistence;
 
-namespace OrderManagement.Api.Entities.Common;
+namespace OrderManagement.Api.Features.Publishers;
 
 public class EventPublisherWorker(IServiceScopeFactory scopeFactory, ILogger<EventPublisherWorker> logger)
     : BackgroundService
@@ -29,13 +33,20 @@ public class EventPublisherWorker(IServiceScopeFactory scopeFactory, ILogger<Eve
                 {
                     try
                     {
-                        await publisher.Publish(@event.DomainEvent, stoppingToken);
+                        if (@event.DomainEvent is OrderCreatedEvent orderCreatedEvent)
+                            await publisher.Publish(new DomainEventWrapper<OrderCreatedEvent>(orderCreatedEvent), stoppingToken);
+
+                        if (@event.DomainEvent is SendCreatedOrderEmailEvent sendCreatedOrderEmailEvent)
+                            await publisher.Publish(
+                                new DomainEventWrapper<SendCreatedOrderEmailEvent>(sendCreatedOrderEmailEvent),
+                                stoppingToken);
+
                         eventsToRemove.Add(@event);
 
                     }
                     catch (Exception e)
                     {
-                        logger.LogError(e,"There was an error publishing event {eventName}",@event.DomainEvent.GetType().Name);
+                        logger.LogError(e, "There was an error publishing event {eventName}", @event.DomainEvent.GetType().Name);
                     }
                 }
 
@@ -49,10 +60,10 @@ public class EventPublisherWorker(IServiceScopeFactory scopeFactory, ILogger<Eve
             }
             catch (Exception e)
             {
-                _logger.LogError(e,e.Message);
+                _logger.LogError(e, e.Message);
             }
 
-            await Task.Delay(2000,stoppingToken);
+            await Task.Delay(2000, stoppingToken);
         }
     }
 }
